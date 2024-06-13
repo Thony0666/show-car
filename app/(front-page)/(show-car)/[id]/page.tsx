@@ -4,22 +4,15 @@ import { Box, Button, Grid, Pagination, Typography } from "@mui/material";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import img from "../../../../assets/images/other.jpg";
-import logo from "@/public/hcc-dark.png";
 import ModalApp from "@/app/components/modal/ModalAppoint";
 import axios from "axios";
 import CardAnnex from "@/app/components/cards/CardAnnex";
 import { UrlSite } from "@/app/utils";
 import { grey } from "@mui/material/colors";
 import TableSpec from "@/app/components/TableSpec";
-import img1 from "../../../../assets/images/R.jpg";
-import img2 from "../../../../assets/images/Bannier.jpg";
-import img3 from "../../../../assets/images/blue-jeep-photo-shooting-sunset.jpg";
-import img4 from "../../../../assets/images/giny.jpg";
-import img5 from "../../../../assets/images/pneuOrange.jpg";
-import img6 from "../../../../assets/images/1716955138152.jpg";
 import Link from "next/link";
 import Waiter from "@/app/components/waiter/Waiter";
+
 interface Data {
   id: number;
   name: string;
@@ -33,29 +26,34 @@ interface Data {
   power: number;
   placeNumber: number;
   status: string;
-  images: string;
+  images: { id: number; url: string }[];
 }
 
 function Page() {
   const params = useParams();
   const [open, setOpen] = useState<boolean>(false);
-  const [datas, setData] = useState<any>([]);
-  const [datasAnnex, setDataAnnex] = useState<any[]>([]);
-  const [imageList] = useState<any>([img1, img2, img3, img4, img5, img6]);
-  const [selectedImage, setSelectedImage] = useState<any>(img1);
+  const [datas, setData] = useState<Data | null>(null);
+  const [datasAnnex, setDataAnnex] = useState<Data[]>([]);
+  const [imageList, setImage] = useState<{ id: number; url: string }[]>([]);
+  const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);
   const [page, setPage] = useState<number>(1);
   const [pageNumber, setPageNumber] = useState<number>(0);
   const [load, setLoad] = useState<boolean>(true);
 
-  const handleClick = (image: any) => {
-    setSelectedImage(image);
+  const handleClick = (image: { id: number; url: string }) => {
+    setSelectedImage(image.url);
   };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(UrlSite(`cars/${params.id}`));
         setData(response.data);
-        setLoad(false)
+        setImage(response.data.images);
+        if (response.data.images.length > 0) {
+          setSelectedImage(response.data.images[0].url);
+        }
+        setLoad(false);
       } catch (error) {
         console.error(error);
       }
@@ -63,33 +61,35 @@ function Page() {
 
     fetchData();
   }, [params.id]);
+
   useEffect(() => {
-    let config = {
-      method: "get",
-      maxBodyLength: Infinity,
-      url: UrlSite(`cars/type/${datas.type}/exclude/${params.id}`),
-      params: {
-        page: page,
-        perPage: 8,
-      },
-    };
-    axios
-      .request(config)
-      .then((response) => {
-        setDataAnnex(response.data.items);
-        setPageNumber(response.data.totalPages);
-      })
-      .catch((error) => {
-        console.error("tsy mandeha url articles");
-        console.error(error);
-      });
-  }, [page, params.id, datas.type]);
-  const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
-    value: number
-  ) => {
+    if (datas) {
+      const config = {
+        method: "get",
+        maxBodyLength: Infinity,
+        url: UrlSite(`cars/type/${datas.type}/exclude/${params.id}`),
+        params: {
+          page: page,
+          perPage: 8,
+        },
+      };
+      axios
+        .request(config)
+        .then((response) => {
+          setDataAnnex(response.data.items);
+          setPageNumber(response.data.totalPages);
+        })
+        .catch((error) => {
+          console.error("tsy mandeha url articles");
+          console.error(error);
+        });
+    }
+  }, [page, params.id, datas]);
+
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
   };
+
   if (load) {
     return <Waiter loadingState={load} />;
   } else {
@@ -103,50 +103,26 @@ function Page() {
           <Grid container item sm={8} justifyContent={"center"} p={2}>
             <Grid container boxShadow={"0 0 5px"}>
               <Grid container item sm={6} alignContent={"flex-start"}>
-                <Grid
-                  container
-                  maxHeight={"50vh"}
-                  minHeight={"50vh"}
-                  overflow={"hidden"}
-                  position={"relative"}
-                >
-                  <Grid container alignContent={"center"}>
-                    <Grid position={"relative"}>
-                      <Image
-                        src={selectedImage}
-                        alt={`image`}
-                        style={{ width: "100%" }}
-                      />
-                      <Grid
-                        position={"absolute"}
-                        top={20}
-                        color={"orange"}
-                        zIndex={999}
-                        left={0}
-                      >
+                <Grid container maxHeight={"50vh"} minHeight={"50vh"} mx={2} p={1} justifyContent={'center'} width={"95%"} overflow={"hidden"} position={"relative"}>
+                  <Grid container alignContent={"center"} justifyContent={'center'}>
+                    <Grid position={"relative"} >
+                      {selectedImage && (
+                        <Image src={selectedImage} alt="image" style={{ width: "100%" }} width={600} height={600} />
+                      )}
+                      <Grid position={"absolute"} top={20} color={"orange"} zIndex={999} left={0}>
                         <Grid px={2} bgcolor={"orange"}>
-                          <Typography
-                            variant="h4"
-                            fontWeight={"bold"}
-                            color={"white"}
-                          >
-                            {datas.price} MGA
+                          <Typography variant="h4" fontWeight={"bold"} color={"white"}>
+                            {datas?.price} MGA
                           </Typography>
                         </Grid>
                       </Grid>
                     </Grid>
                   </Grid>
                 </Grid>
-                <Grid
-                  container
-                  padding={1}
-                  minHeight={250}
-                  className="photoGrid"
-                  justifyContent={"center"}
-                >
-                  {imageList.map((image: any, index: any) => (
+                <Grid container padding={1} minHeight={250} className="photoGrid" justifyContent={"center"} >
+                  {imageList.map((image) => (
                     <Grid
-                      key={index}
+                      key={image.id}
                       item
                       xs={5.5}
                       m={1}
@@ -161,12 +137,7 @@ function Page() {
                       }}
                     >
                       <Link href={"#"}>
-                        <Image
-                          src={image}
-                          alt={`image`}
-                          layout="fill"
-                          objectFit="cover"
-                        />
+                        <Image src={image.url} alt="image" layout="fill" objectFit="cover" />
                       </Link>
                       <Box
                         sx={{
@@ -190,28 +161,13 @@ function Page() {
                   ))}
                 </Grid>
               </Grid>
-              <Grid
-                container
-                justifyContent={"center"}
-                alignContent={"space-evenly"}
-                item
-                sm={6}
-                px={2}
-              >
+              <Grid container justifyContent={"center"} alignContent={"space-evenly"} item sm={6} px={2}>
                 <Grid container justifyContent={"center"}>
-                  <Typography
-                    variant="h4"
-                    fontFamily={"revert"}
-                    fontWeight={"bold"}
-                  >
-                    {datas.name}
+                  <Typography variant="h4" fontFamily={"revert"} fontWeight={"bold"}>
+                    {datas?.name}
                   </Typography>
                 </Grid>
-                <Grid
-                  container
-                  justifyContent={"space-around"}
-                  alignContent={"flex-start"}
-                >
+                <Grid container justifyContent={"space-around"} alignContent={"flex-start"}>
                   <Grid container>
                     <TableSpec data={datas} />
                     <Grid container justifyContent={"flex-end"} my={1}>
@@ -244,13 +200,7 @@ function Page() {
             borderLeft={"rgb(0,0,0,0.2) solid 1px"}
             alignContent={"center"}
           >
-            <Grid
-              container
-              justifyContent={"space-evenly"}
-              maxHeight={"80vh"}
-              sx={{ overflowY: "auto" }}
-              pt={2}
-            >
+            <Grid container justifyContent={"space-evenly"} maxHeight={"80vh"} sx={{ overflowY: "auto" }} pt={2}>
               {datasAnnex.map((item) => (
                 <Grid key={item.id}>
                   <CardAnnex data={item} />

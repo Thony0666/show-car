@@ -16,6 +16,7 @@ function CardAnnex({ data }: any) {
         maxWidth={"14vw"}
         alignContent={"flex-start"}
         boxShadow={"0  0  10px"}
+        overflow={'hidden'}
         mb={2}
       >
         <Grid
@@ -25,7 +26,7 @@ function CardAnnex({ data }: any) {
           overflow={"hidden"}
           position={"relative"}
         >
-          <Image src={imgList} alt={`img`} style={{ width: "100%" }} />
+          <Image src={datas.images[0].url} alt={`img`} style={{ width: "100%" }} width={200} height={200}/>
           <Grid
                 position={"absolute"}
                 top={20}

@@ -89,21 +89,9 @@ const Page: NextPage = () => {
           Product
         </Typography>
       </Grid>
-      <Grid container>
-        <Grid container justifyContent={"center"}>
-          <Typography variant="h3" fontWeight={"bolder"} fontFamily={"revert"}>
-            Car liste
-          </Typography>
-        </Grid>
-        {/* <Grid container sm={4} justifyContent={"center"}>
-          <Typography variant="h5" fontWeight={"bolder"} fontFamily={"revert"}>
-            Annex
-          </Typography>
-        </Grid> */}
-      </Grid>
 
       <Grid container>
-        <Grid container p={2} justifyContent={"center"}>
+        <Grid container justifyContent={"center"}>
           <ProductList />
         </Grid>
       </Grid>

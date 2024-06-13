@@ -40,7 +40,7 @@ const TableSpec: React.FC<any> = ({ data }: any) => {
     createData("Type", data.type),
     createData("Moto type", data.motorType),
     createData("Power", data.power + " cv"),
-    createData("Number place", data.placeNumber),
+    createData("Number place", data.placeNumber + " personnes"),
     createData("Gingerbread", data.name),
   ];
 

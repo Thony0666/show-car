@@ -13,6 +13,10 @@ import AppointList from "./appoint/AppointList";
 import { UrlSite } from "../utils";
 import ShowApp from "./appoint/ShowApp";
 import EditApp from "./appoint/EditApp";
+import LoginPage from "./login/LoginPage";
+import authProvider from "../utils/authProvider";
+import CapitalizeFirstLetter from "../Helper/CapitalizeFirstLetter";
+import { MyLayout } from "./components/MyLayout";
 const apiUrl=UrlSite();
 const dataProvider: any = {
   getList: async (resource: any, params: any) => {
@@ -37,13 +41,21 @@ const dataProvider: any = {
   },
  create: async (resource: string, params: any) => {
     console.log("Data sent to API :", JSON.stringify(params.data));
-    let requestBody;
+    let requestBody: FormData | string;
     const headers: HeadersInit = new Headers();
 
     if (resource === "cars") {
-      requestBody = new FormData();
-      requestBody.append('data', JSON.stringify(params.data));
-      headers.append('Accept', 'multipart/form-data');
+      const formData = new FormData();
+        Object.keys(params.data).forEach(key => {
+            if (key === 'images') {
+                params.data[key].forEach((fileObj: any) => {
+                    formData.append('images', fileObj.rawFile);
+                });
+            } else {
+                formData.append(key, `${params.data[key]}`);
+            }
+        });
+        requestBody = formData;
     } else {
       requestBody = JSON.stringify(params.data);
       headers.append('Content-Type', 'application/json');
@@ -51,7 +63,7 @@ const dataProvider: any = {
 
     const { json } = await fetchUtils.fetchJson(`${apiUrl}/${resource}`, {
       method: "POST",
-      body: requestBody,
+      body: requestBody != undefined ? requestBody : undefined,
       headers: headers,
     });
 
@@ -119,6 +131,9 @@ export const App = () => (
     dataProvider={dataProvider}
     theme={orangeTheme}
     darkTheme={radiantDarkTheme}
+    loginPage={LoginPage}
+    authProvider={authProvider}
+    layout={MyLayout}
   >
     <Resource
       name="cars"
@@ -127,6 +142,7 @@ export const App = () => (
       edit={CarEdit}
       show={ShowCar}
       icon={IconCar}
+      recordRepresentation={(record) => `${CapitalizeFirstLetter(record.name)}`}
     />
     <Resource
       name="users"

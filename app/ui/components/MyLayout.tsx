@@ -1,14 +1,4 @@
-import React from 'react';
-import { MenuItemLink } from 'react-admin';
+import { Layout } from "react-admin";
+import { MyAppBar } from "./MyAppBar";
 
-const MyMenu = () => {
-  return (
-    <div>
-      <MenuItemLink to="/" primaryText="Home" />
-      <MenuItemLink to="/posts" primaryText="Posts" />
-      {/* Ajoutez d'autres éléments de menu ici */}
-    </div>
-  );
-};
-
-export default MyMenu;
+export const MyLayout = (props: any) => <Layout {...props} appBar={MyAppBar} />;
